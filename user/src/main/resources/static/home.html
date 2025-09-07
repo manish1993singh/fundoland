@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      #toast {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+      }
+      #toast.show {
+        visibility: visible;
+        -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      }
+      @-webkit-keyframes fadein {
+        from {
+          bottom: 0;
+          opacity: 0;
+        }
+        to {
+          bottom: 30px;
+          opacity: 1;
+        }
+      }
+      @keyframes fadein {
+        from {
+          bottom: 0;
+          opacity: 0;
+        }
+        to {
+          bottom: 30px;
+          opacity: 1;
+        }
+      }
+      @-webkit-keyframes fadeout {
+        from {
+          bottom: 30px;
+          opacity: 1;
+        }
+        to {
+          bottom: 0;
+          opacity: 0;
+        }
+      }
+      @keyframes fadeout {
+        from {
+          bottom: 30px;
+          opacity: 1;
+        }
+        to {
+          bottom: 0;
+          opacity: 0;
+        }
+      }
+    </style>
+    <script>
+      const eventSource = new EventSource(
+        "http://localhost:8082/api/sse/notifications"
+      );
+      eventSource.onmessage = function (event) {
+        // Show toast or update UI
+        console.log(event.data);
+        showToast(event.data);
+      };
+      async function fetchUser() {
+        try {
+          const response = await fetch("/rest/users");
+          if (!response.ok) throw new Error("Network response was not ok");
+          const data = await response.json();
+          document.getElementById("userResult").textContent = JSON.stringify(
+            data,
+            null,
+            2
+          );
+        } catch (error) {
+          document.getElementById("userResult").textContent =
+            "Error fetching user: " + error.message;
+        }
+      }
+
+      function showToast(message, isError = false) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.backgroundColor = isError ? "#d32f2f" : "#388e3c";
+        toast.className = "show";
+        setTimeout(() => {
+          toast.className = toast.className.replace("show", "");
+        }, 3000);
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("userForm");
+        form.addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          try {
+            const response = await fetch("/rest/add", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: `name=${encodeURIComponent(
+                name
+              )}&email=${encodeURIComponent(email)}`,
+            });
+            const text = await response.text();
+            if (response.ok && text === "Saved") {
+              showToast("User registered successfully!");
+              form.reset();
+            } else {
+              showToast(text || "Registration failed.", true);
+            }
+          } catch (err) {
+            showToast("Network error: " + err.message, true);
+          }
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Welcome to Home Page</h1>
+    <form id="userForm">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required /><br /><br />
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required /><br /><br />
+      <button type="submit">Submit</button>
+    </form>
+    <div id="toast"></div>
+    <button onclick="fetchUser()">Fetch User</button>
+    <p
+      id="userResult"
+      style="white-space: pre-wrap; font-family: monospace"
+    ></p>
+  </body>
+</html>
