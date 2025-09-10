@@ -33,48 +33,147 @@
         to {
           bottom: 30px;
           opacity: 1;
-        }
-      }
-      @keyframes fadein {
-        from {
-          bottom: 0;
-          opacity: 0;
-        }
-        to {
-          bottom: 30px;
-          opacity: 1;
-        }
-      }
-      @-webkit-keyframes fadeout {
-        from {
-          bottom: 30px;
-          opacity: 1;
-        }
-        to {
-          bottom: 0;
-          opacity: 0;
-        }
-      }
-      @keyframes fadeout {
-        from {
-          bottom: 30px;
-          opacity: 1;
-        }
-        to {
-          bottom: 0;
-          opacity: 0;
-        }
-      }
+
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <title>Home</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <style>
+            #toast {
+              visibility: hidden;
+              min-width: 250px;
+              margin-left: -125px;
+              background-color: #333;
+              color: #fff;
+              text-align: center;
+              border-radius: 2px;
+              padding: 16px;
+              position: fixed;
+              z-index: 1;
+              left: 50%;
+              bottom: 30px;
+              font-size: 17px;
+            }
+            #toast.show {
+              visibility: visible;
+              -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+              animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            }
+            @-webkit-keyframes fadein {
+              from { bottom: 0; opacity: 0; }
+              to { bottom: 30px; opacity: 1; }
+            }
+            @keyframes fadein {
+              from { bottom: 0; opacity: 0; }
+              to { bottom: 30px; opacity: 1; }
+            }
+            @-webkit-keyframes fadeout {
+              from { bottom: 30px; opacity: 1; }
+              to { bottom: 0; opacity: 0; }
+            }
+            @keyframes fadeout {
+              from { bottom: 30px; opacity: 1; }
+              to { bottom: 0; opacity: 0; }
+            }
     </style>
+  </head>
+  <body>
+    <div style="display: flex; flex-direction: row; height: 100vh">
+      <div style="flex: 2; padding: 24px">
+        <h1>Welcome to Home Page</h1>
+        <form id="userForm">
+          <label for="name">Name:</label>
+          <input type="text" id="name" name="name" required /><br /><br />
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email" required /><br /><br />
+          <button type="submit">Submit</button>
+        </form>
+        <div id="toast"></div>
+        <button onclick="fetchUser()">Fetch User</button>
+        <hr />
+        <h2>Actuator Endpoints</h2>
+        <button onclick="callActuator('health')">Health</button>
+        <button onclick="callActuator('info')">Info</button>
+        <button onclick="callActuator('metrics')">Metrics</button>
+        <button onclick="callActuator('env')">Env</button>
+        <button onclick="callActuator('beans')">Beans</button>
+        <button onclick="callActuator('configprops')">Config Props</button>
+        <button onclick="callActuator('loggers')">Loggers</button>
+        <button onclick="callActuator('threaddump')">Thread Dump</button>
+        <button onclick="callActuator('httptrace')">HTTP Trace</button>
+        <button onclick="callActuator('mappings')">Mappings</button>
+        <button onclick="callActuator('scheduledtasks')">
+          Scheduled Tasks
+        </button>
+        <button onclick="callActuator('conditions')">Conditions</button>
+      </div>
+      <div
+        style="
+          flex: 1;
+          background: #f5f5f5;
+          padding: 24px;
+          border-left: 1px solid #ccc;
+          overflow-y: auto;
+        "
+      >
+        <h2>Sidepanel</h2>
+        <h3>All Users Response</h3>
+        <pre
+          id="userResult"
+          style="white-space: pre-wrap; font-family: monospace"
+        ></pre>
+        <h3>Actuator Response</h3>
+        <pre
+          id="actuatorResult"
+          style="white-space: pre-wrap; font-family: monospace"
+        ></pre>
+      </div>
+    </div>
     <script>
-      const eventSource = new EventSource(
-        "http://localhost:8082/api/sse/notifications"
-      );
-      eventSource.onmessage = function (event) {
-        // Show toast or update UI
-        console.log(event.data);
-        showToast(event.data);
+      const actuatorUseCases = {
+        health: "Shows application health status (database, RabbitMQ, etc.)",
+        info: "Displays custom application info (version, description, etc.)",
+        metrics: "Shows performance and resource metrics (JVM, HTTP, etc.)",
+        env: "Displays environment properties and config values",
+        beans: "Lists all Spring beans in the application context",
+        configprops: "Shows configuration properties and their values",
+        loggers: "View and change log levels at runtime",
+        threaddump: "Shows a thread dump for debugging concurrency issues",
+        httptrace: "Shows recent HTTP request traces",
+        mappings: "Lists all REST endpoints and request mappings",
+        scheduledtasks: "Displays scheduled tasks in the application",
+        conditions:
+          "Shows auto-configuration conditions (why beans are loaded)",
       };
+
+      async function callActuator(endpoint) {
+        try {
+          const response = await fetch(`/actuator/${endpoint}`);
+          if (!response.ok) throw new Error("Network response was not ok");
+          let data;
+          // Thread dump returns plain text, others return JSON
+          if (endpoint === "threaddump") {
+            data = await response.text();
+          } else {
+            data = await response.json();
+          }
+          const useCase = actuatorUseCases[endpoint] || "";
+          let header = `\n=== ${endpoint.toUpperCase()} ===\nUse case: ${useCase}\n\n`;
+          let result;
+          if (endpoint === "threaddump") {
+            result = header + data;
+          } else {
+            result = header + JSON.stringify(data, null, 2);
+          }
+          document.getElementById("actuatorResult").textContent = result;
+        } catch (error) {
+          document.getElementById("actuatorResult").textContent =
+            `Error fetching /actuator/${endpoint}: ` + error.message;
+        }
+      }
+
       async function fetchUser() {
         try {
           const response = await fetch("/rest/users");
@@ -129,79 +228,6 @@
           }
         });
       });
-    </script>
-  </head>
-  <body>
-    <h1>Welcome to Home Page</h1>
-    <form id="userForm">
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required /><br /><br />
-      <label for="email">Email:</label>
-      <input type="email" id="email" name="email" required /><br /><br />
-      <button type="submit">Submit</button>
-    </form>
-    <div id="toast"></div>
-    <button onclick="fetchUser()">Fetch User</button>
-    <hr />
-    <h2>Actuator Endpoints</h2>
-    <button onclick="callActuator('health')">Health</button>
-    <button onclick="callActuator('info')">Info</button>
-    <button onclick="callActuator('metrics')">Metrics</button>
-    <button onclick="callActuator('env')">Env</button>
-    <button onclick="callActuator('beans')">Beans</button>
-    <button onclick="callActuator('configprops')">Config Props</button>
-    <button onclick="callActuator('loggers')">Loggers</button>
-    <button onclick="callActuator('threaddump')">Thread Dump</button>
-    <button onclick="callActuator('httptrace')">HTTP Trace</button>
-    <button onclick="callActuator('mappings')">Mappings</button>
-    <button onclick="callActuator('scheduledtasks')">Scheduled Tasks</button>
-    <button onclick="callActuator('conditions')">Conditions</button>
-    <pre
-      id="actuatorResult"
-      style="white-space: pre-wrap; font-family: monospace"
-    ></pre>
-    <script>
-      const actuatorUseCases = {
-        health: "Shows application health status (database, RabbitMQ, etc.)",
-        info: "Displays custom application info (version, description, etc.)",
-        metrics: "Shows performance and resource metrics (JVM, HTTP, etc.)",
-        env: "Displays environment properties and config values",
-        beans: "Lists all Spring beans in the application context",
-        configprops: "Shows configuration properties and their values",
-        loggers: "View and change log levels at runtime",
-        threaddump: "Shows a thread dump for debugging concurrency issues",
-        httptrace: "Shows recent HTTP request traces",
-        mappings: "Lists all REST endpoints and request mappings",
-        scheduledtasks: "Displays scheduled tasks in the application",
-        conditions:
-          "Shows auto-configuration conditions (why beans are loaded)",
-      };
-
-      async function callActuator(endpoint) {
-        try {
-          const response = await fetch(`/actuator/${endpoint}`);
-          if (!response.ok) throw new Error("Network response was not ok");
-          let data;
-          // Thread dump returns plain text, others return JSON
-          if (endpoint === "threaddump") {
-            data = await response.text();
-          } else {
-            data = await response.json();
-          }
-          const useCase = actuatorUseCases[endpoint] || "";
-          let header = `\n=== ${endpoint.toUpperCase()} ===\nUse case: ${useCase}\n\n`;
-          let result;
-          if (endpoint === "threaddump") {
-            result = header + data;
-          } else {
-            result = header + JSON.stringify(data, null, 2);
-          }
-          document.getElementById("actuatorResult").textContent = result;
-        } catch (error) {
-          document.getElementById("actuatorResult").textContent =
-            `Error fetching /actuator/${endpoint}: ` + error.message;
-        }
-      }
     </script>
   </body>
 </html>
