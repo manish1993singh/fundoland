@@ -9,6 +9,8 @@ import com.example.user.entity.User;
 // CRUD refers Create, Read, Update, Delete
 
 public interface UserRepository extends CrudRepository<User, Integer> {
-	Optional<User> findByEmail(String email);
+		Optional<User> findByEmail(String email);
+
+		Iterable<User> findAllByDeletedTrue();
 
 }

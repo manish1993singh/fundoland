@@ -83,15 +83,46 @@
     <div style="display: flex; flex-direction: row; height: 100vh">
       <div style="flex: 2; padding: 24px">
         <h1>Welcome to Home Page</h1>
+        <button onclick="fetchUser()" style="margin-bottom: 12px">
+          Fetch All Users
+        </button>
+        <button onclick="fetchDeletedUsers()" style="margin-bottom: 24px">
+          Fetch Deleted Users
+        </button>
         <form id="userForm">
           <label for="name">Name:</label>
           <input type="text" id="name" name="name" required /><br /><br />
           <label for="email">Email:</label>
           <input type="email" id="email" name="email" required /><br /><br />
-          <button type="submit">Submit</button>
+          <button type="submit">Add User</button>
+        </form>
+        <hr />
+        <form id="updateForm">
+          <label for="updateId">User ID:</label>
+          <input
+            type="number"
+            id="updateId"
+            name="updateId"
+            required
+          /><br /><br />
+          <label for="updateName">New Name:</label>
+          <input type="text" id="updateName" name="updateName" /><br /><br />
+          <label for="updateEmail">New Email:</label>
+          <input type="email" id="updateEmail" name="updateEmail" /><br /><br />
+          <button type="submit">Update User</button>
+        </form>
+        <hr />
+        <form id="deleteForm">
+          <label for="deleteId">User ID:</label>
+          <input
+            type="number"
+            id="deleteId"
+            name="deleteId"
+            required
+          /><br /><br />
+          <button type="submit">Delete User</button>
         </form>
         <div id="toast"></div>
-        <button onclick="fetchUser()">Fetch User</button>
         <hr />
         <h2>Actuator Endpoints</h2>
         <button onclick="callActuator('health')">Health</button>
@@ -190,6 +221,22 @@
         }
       }
 
+      async function fetchDeletedUsers() {
+        try {
+          const response = await fetch("/rest/deleted-users");
+          if (!response.ok) throw new Error("Network response was not ok");
+          const data = await response.json();
+          document.getElementById("userResult").textContent = JSON.stringify(
+            data,
+            null,
+            2
+          );
+        } catch (error) {
+          document.getElementById("userResult").textContent =
+            "Error fetching deleted users: " + error.message;
+        }
+      }
+
       function showToast(message, isError = false) {
         const toast = document.getElementById("toast");
         toast.textContent = message;
@@ -201,6 +248,7 @@
       }
 
       document.addEventListener("DOMContentLoaded", function () {
+        // Add User
         const form = document.getElementById("userForm");
         form.addEventListener("submit", async function (e) {
           e.preventDefault();
@@ -222,6 +270,60 @@
               form.reset();
             } else {
               showToast(text || "Registration failed.", true);
+            }
+          } catch (err) {
+            showToast("Network error: " + err.message, true);
+          }
+        });
+
+        // Update User
+        const updateForm = document.getElementById("updateForm");
+        updateForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const id = document.getElementById("updateId").value;
+          const name = document.getElementById("updateName").value;
+          const email = document.getElementById("updateEmail").value;
+          try {
+            const response = await fetch("/rest/update", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: `id=${encodeURIComponent(id)}&name=${encodeURIComponent(
+                name
+              )}&email=${encodeURIComponent(email)}`,
+            });
+            const text = await response.text();
+            if (response.ok && text === "Updated") {
+              showToast("User updated successfully!");
+              updateForm.reset();
+            } else {
+              showToast(text || "Update failed.", true);
+            }
+          } catch (err) {
+            showToast("Network error: " + err.message, true);
+          }
+        });
+
+        // Delete User
+        const deleteForm = document.getElementById("deleteForm");
+        deleteForm.addEventListener("submit", async function (e) {
+          e.preventDefault();
+          const id = document.getElementById("deleteId").value;
+          try {
+            const response = await fetch("/rest/delete", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: `id=${encodeURIComponent(id)}`,
+            });
+            const text = await response.text();
+            if (response.ok && text === "Soft deleted") {
+              showToast("User soft deleted!");
+              deleteForm.reset();
+            } else {
+              showToast(text || "Delete failed.", true);
             }
           } catch (err) {
             showToast("Network error: " + err.message, true);

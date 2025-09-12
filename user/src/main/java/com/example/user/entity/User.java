@@ -16,8 +16,12 @@ public class User implements Serializable{
 
   private String name;
 
+
   @Column(unique = true)
   private String email;
+
+  // Soft delete flag
+  private boolean deleted = false;
 
   public Integer getId() {
     return id;
@@ -41,5 +45,13 @@ public class User implements Serializable{
 
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  public boolean isDeleted() {
+    return deleted;
+  }
+
+  public void setDeleted(boolean deleted) {
+    this.deleted = deleted;
   }
 }
