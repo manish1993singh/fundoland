@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "title": "Enable Redis Caching and Monitoring in User Service",
+    "description": "This update integrates Redis caching and Spring Boot Actuator for monitoring into the User service.",
+    "tags": [
+      "Spring Boot",
+      "Redis",
+      "Caching",
+      "Actuator",
+      "Monitoring",
+      "Java",
+      "Maven"
+    ]
+  },
+  "structure": {
+    "container": {},
+    "items": [
+      {
+        "type": "image",
+        "extension": "png"
+      },
+      {}
+    ]
+  }
+}
