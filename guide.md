@@ -21,57 +21,50 @@ Fundoland is a Spring Boot microservices-based application designed as a distrib
 
 **Port:** `8081`
 
-#### Capabilities
+### Running RabbitMQ
 
-- User registration and management
-- Redis-based caching for improved performance
-- Event publishing for user-related activities
-- Soft delete functionality
-- Cache invalidation on data updates
+The project uses RabbitMQ for eventing. A `rabbitmq` service has been added to `docker-compose.yml` so you can start it together with the other infrastructure services.
 
-#### Database
-
-- **Type:** MySQL
-- **Connection:** `jdbc:mysql://localhost:3306/fundoland_db`
-- **Credentials:** `fundoland_user` / `userpassword`
-
-#### Key Features
-
-- Email-based user lookup with caching
-- Automatic cache eviction on updates
-- Publishes `UserCreatedEvent` and `UserCreationFailedEvent` to RabbitMQ
-- Supports Redis caching for frequently accessed user data
-
-#### APIs
-
-| Method | Endpoint              | Parameters                                            | Description                                    |
-| ------ | --------------------- | ----------------------------------------------------- | ---------------------------------------------- |
-| POST   | `/rest/add`           | `name` (String), `email` (String)                     | Add a new user. Returns error if email exists. |
-| GET    | `/rest/users`         | -                                                     | Retrieve all non-deleted users                 |
-| GET    | `/rest/userByEmail`   | `email` (String)                                      | Get user by email (cached in Redis)            |
-| POST   | `/rest/update`        | `id` (Integer), `name` (optional), `email` (optional) | Update user information                        |
-| POST   | `/rest/delete`        | `id` (Integer)                                        | Soft delete a user by ID                       |
-| GET    | `/rest/deleted-users` | -                                                     | Fetch all soft-deleted users                   |
-
-#### Example Requests
-
-**Add User:**
+1. Start RabbitMQ with Docker Compose (recommended):
 
 ```bash
-POST http://localhost:8081/rest/add?name=John%20Doe&email=john@example.com
+docker compose up -d rabbitmq
 ```
 
-**Get All Users:**
+Or start all infrastructure services (MySQL, MongoDB, Redis, RabbitMQ):
 
 ```bash
-GET http://localhost:8081/rest/users
+docker compose up -d
 ```
+
+2. Quick alternative: run RabbitMQ with Docker (includes management UI on port 15672):
+
+```bash
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+```
+
+After either option:
+
+- AMQP endpoint: `amqp://localhost:5672`
+- Management UI: `http://localhost:15672/` (default user/password: `guest` / `guest` when used locally)
+
+3. Verify connection
+
+```bash
+# check container is running
+```
+
+# open management UI in a browser: http://localhost:15672/
+
+````
+
+If your services expect a specific exchange/queue configuration the application will typically declare those bindings on startup; otherwise create them in the management UI or via a startup script.
 
 **Get User by Email (Cached):**
 
 ```bash
 GET http://localhost:8081/rest/userByEmail?email=john@example.com
-```
+````
 
 **Update User:**
 
@@ -209,15 +202,17 @@ File: `log-service/src/main/resources/application.properties`
 ### Prerequisites
 
 - Java 21 or higher
-- Maven 3.8+
-- Docker & Docker Compose (for running services)
+- Maven 3.8+ (optional — the project includes the Maven wrapper so a system Maven install is not required)
+- Docker Desktop (Windows) / Docker & Docker Compose (for running infrastructure services). On Windows you must start Docker Desktop before running `docker compose` so the Docker daemon is available.
 
 ### Step 1: Start Infrastructure Services
+
+Before running Docker Compose on Windows make sure Docker Desktop is running (open the Docker Desktop app and wait until it shows "Running").
 
 Run Docker Compose to start MySQL, MongoDB, and Redis:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 **Services Started:**
@@ -225,11 +220,66 @@ docker-compose up -d
 - MySQL (Port 3306)
 - MongoDB (Port 27017)
 - Redis (Port 6379)
-- RabbitMQ (Port 5672) - _if configured in docker-compose_
+- RabbitMQ (Port 5672) - _if configured in `docker-compose.yml` or started separately_
+
+Note: If you use the older `docker-compose` binary the command `docker-compose up -d` still works, but Compose V2 (`docker compose`) ignores the top-level `version:` field in the compose file and will log a warning — this is expected.
+
+### Running RabbitMQ
+
+The project uses RabbitMQ for eventing. RabbitMQ is not included by default in the existing `docker-compose.yml` in this repository, so you can either add it to your compose file or run it separately.
+
+1. Quick: run RabbitMQ with Docker (includes management UI on port 15672):
+
+```bash
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+```
+
+After this command:
+
+- AMQP endpoint: `amqp://localhost:5672`
+- Management UI: `http://localhost:15672/` (default user/password: `guest` / `guest` when used locally)
+
+2. Or add this service to your `docker-compose.yml` (example snippet):
+
+```yaml
+rabbitmq:
+  image: rabbitmq:3-management
+  container_name: rabbitmq
+  ports:
+    - "5672:5672"
+    - "15672:15672"
+  environment:
+    RABBITMQ_DEFAULT_USER: guest
+    RABBITMQ_DEFAULT_PASS: guest
+```
+
+Then run:
+
+```bash
+docker compose up -d rabbitmq
+```
+
+3. Verify connection
+
+```bash
+# check container is running
+docker ps --filter "name=rabbitmq"
+# open management UI in a browser: http://localhost:15672/
+```
+
+If your services expect a specific exchange/queue configuration the application will typically declare those bindings on startup; otherwise create them in the management UI or via a startup script.
 
 ### Step 2: Build the Project
 
-From the root directory:
+From the root directory you can either use your system `mvn` (if installed) or the included Maven wrapper. The wrapper is recommended because it ensures a consistent Maven version and doesn't require installing Maven system-wide.
+
+Using the wrapper (Windows PowerShell):
+
+```powershell
+.\mvnw.cmd clean install
+```
+
+Or using system Maven:
 
 ```bash
 mvn clean install
@@ -239,28 +289,22 @@ This builds all modules: `user`, `notification`, and `log-service`.
 
 ### Step 3: Run Individual Services
 
-#### Option A: Using Maven
+#### Option A: Using Maven / Maven Wrapper
 
-**User Service:**
+On Windows use the Maven wrapper included in the repo (avoids needing a system Maven install). From the project root:
 
-```bash
-cd user
-mvn spring-boot:run
+```powershell
+# User service
+.\user\mvnw.cmd spring-boot:run
+
+# Notification service
+.\notification\mvnw.cmd spring-boot:run
+
+# Log service
+.\log-service\mvnw.cmd spring-boot:run
 ```
 
-**Notification Service:**
-
-```bash
-cd notification
-mvn spring-boot:run
-```
-
-**Log Service:**
-
-```bash
-cd log-service
-mvn spring-boot:run
-```
+If you have system Maven and prefer it, replace the wrapper commands with `mvn spring-boot:run` executed inside each module directory.
 
 #### Option B: Run JAR Files
 
@@ -294,6 +338,8 @@ curl http://localhost:8081/actuator/health
 curl http://localhost:8082/actuator/health
 curl http://localhost:8083/actuator/health
 ```
+
+If you used `docker compose up -d` and saw errors earlier, note that those were typically caused by Docker Desktop not running; starting Docker Desktop resolved the named-pipe/daemon connection error on Windows.
 
 ---
 
