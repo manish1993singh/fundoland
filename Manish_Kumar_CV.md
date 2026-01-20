@@ -70,6 +70,25 @@ _December 2021 – Present_
 
 ---
 
+### **Authentication Client Migration (Shared Scala Library)**
+
+- Worked on an organization-wide client migration involving a shared Scala library used across multiple projects for collecting authentication data.
+- Analyzed the existing implementation and identified functional limitations introduced due to broader system migrations.
+- Investigated the downstream impact across multiple user journeys, which had resulted in repeated production incidents.
+- Planned and executed a new implementation supporting the full set of required authentication features while mitigating ongoing incidents.
+- Coordinated rollout and guided multiple journey teams to adopt and reuse the updated library.
+- Helped downstream teams resolve authentication-related issues by standardizing on the new implementation.
+
+**Impact:**
+
+- Reduced recurring authentication-related incidents across journeys.
+- Restored feature parity and improved reliability during organization-wide system migrations.
+- Improved reuse and consistency by converging teams on a shared client implementation.
+
+**Technologies:** Scala, Play Framework
+
+---
+
 ### **Medical Plan Member Dashboard**
 
 - Implemented a BFF-driven frontend architecture using Java Spring Boot and React + Zustand, working closely with the team.
@@ -100,6 +119,23 @@ While the overall BFF-driven frontend platform was pre-existing, this project va
 
 ---
 
+### **Ticket Tracking Application**
+
+- Planned and developed a ticket tracking application using the same BFF-driven architecture.
+- Owned the project end-to-end, including solution design, ticket breakdown, development, and technical oversight.
+- Ensured consistent architectural patterns across frontend and backend to maximize reuse and long-term maintainability.
+- Coordinated delivery across the team and aligned the solution with broader platform standards.
+- The application significantly improved issue visibility and self-service capabilities.
+
+**Impact:**
+
+- Resulted in a **~30% reduction in call center engagement**, leading to **substantial operational cost savings**.
+- Delivery and impact of this project contributed to promotion to **Lead Software Developer (March 2025)**.
+
+**Technologies:** Java, Spring Boot, React, Zustand, Redis
+
+---
+
 ### **Engineering Excellence & Operations**
 
 - Developed unit test cases for both existing and new features across frontend and backend systems.
@@ -117,14 +153,13 @@ _August 2019 – November 2021_
 - Worked on a DIY platform enabling businesses to digitize internal workflows.
 - Part of the team developing **programmable objects**, which paved the path for a flexible and extensible DIY platform.
 - Migrated major portions of the platform from **Backbone.js to React**.
+- Integrated Amazon S3 for hosting video content in social feeds.
 
 **Advantages of React Migration:**
 
 - Improved long-term maintainability and readability.
 - Reduced regression issues during feature additions.
 - Lowered bug frequency after introducing new features through better state management and component isolation.
-
-- Integrated Amazon S3 for hosting video content in social feeds.
 
 **Advantages of S3 Integration:**
 
@@ -161,8 +196,8 @@ _September 2015 – July 2019_
 - **React Mention Div** – User tagging component built on top of Mention Observer  
   https://www.npmjs.com/package/@jsmine/react-mention-div
 
-- Developed multiple Android games applying OOP principles and design patterns.
 - Built a news aggregation frontend using React and Redux.
+- Developed multiple Android games applying OOP principles and design patterns.
 
 ---
 
