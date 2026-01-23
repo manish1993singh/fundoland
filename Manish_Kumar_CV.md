@@ -6,7 +6,7 @@
 
 ## Professional Summary
 
-Staff-level software engineer with nearly a decade of experience across Quality Engineering, Frontend, Full Stack, and Backend development. Proven ability to modernize legacy systems, implement scalable architectures, and lead cross-team technical initiatives. Strong advocate of pragmatic architecture—having worked with monoliths, monorepos, and microservices—choosing the right approach based on context rather than trend. Experienced in mentoring engineers, enabling platform adoption, and delivering systems with measurable performance and reliability improvements.
+Staff-level software engineer with over a decade of experience across Quality Engineering, Frontend, Full Stack, and Backend development. Proven ability to modernize legacy systems, implement scalable architectures, and lead cross-team technical initiatives. Strong advocate of pragmatic architecture—having worked with monoliths, monorepos, and microservices—choosing the right approach based on context rather than trend. Experienced in mentoring engineers, enabling platform adoption, and delivering systems with measurable performance and reliability improvements.
 
 ---
 
@@ -14,23 +14,21 @@ Staff-level software engineer with nearly a decade of experience across Quality 
 
 **Frontend:** React, Redux, Zustand, Styled Components, HTML, CSS, JavaScript  
 **Backend:** Java (Spring Boot), Scala (Play Framework), Python (FastAPI)
+**AI & ML:** RAG, Agentic AI, Prompt Engineering, Guardrails
+**Databases & Caching:** Redis
+**Testing & Quality:** Selenium, Appium, JMeter, Unit Testing, UI Automation
+
+**Cloud & Storage:** Amazon S3
 
 **Architecture & Design:**
 
+- Distributed systems and service-oriented design
 - BFF-driven frontend platforms
 - Microservices, Monolithic architectures, Monorepos
 - API design, frontend-backend decoupling
 - Platform and reuse-oriented system design
 
-**Testing & Quality:** Selenium, Appium, JMeter, Unit Testing, UI Automation
-
-**Databases & Caching:** Redis
-
-**Cloud & Storage:** Amazon S3
-
 **Observability & Ops:** Splunk, Datadog, Production Monitoring, Incident Triage
-
-**AI & ML:** RAG, Agentic AI, Prompt Engineering, Guardrails
 
 **Practices:** System Design, Technical Leadership, Release Management, Mentorship
 
@@ -174,7 +172,7 @@ _August 2019 – November 2021_
 ### **Hubbler (formerly Ires Technologies)**
 
 **QA Engineer → Senior QA Engineer**  
-_September 2015 – July 2019_
+_September 2015 – June 2019_
 
 - Built and maintained manual and automated test suites for web and mobile applications.
 - Developed a web automation suite using **Python and Selenium**, improving regression reliability.
